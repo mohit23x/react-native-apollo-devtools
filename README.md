@@ -5,7 +5,7 @@
 1. Add these lines in the package.json as devDependencies
 
 ```
-    "react-native-apollo-devtools": "https://github.com/mohit23x/react-native-apollo-devtools.git#7f32cd9b11ff887edf1aa527db91036f79b061f0",
+    "react-native-apollo-devtools": "https://github.com/mohit23x/react-native-apollo-devtools.git#4efe5b63ef5911b66fed6144259b94292cdd6d2b",
     "react-native-flipper": "^0.131.1",
 ```
 
@@ -20,7 +20,7 @@ if(__DEV__){
 
 ```
 
-3. Install Flipper in your system
+3. Install Flipper in your system, and make sure the emulator/device is recognized by flipper by setting up proper SDK path
 
 
 4. Go to `plugins manager` -> `install plugin` -> `import plugin` (at the bottom)
