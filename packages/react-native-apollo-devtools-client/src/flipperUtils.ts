@@ -20,7 +20,6 @@ export function getQueryData(
   }
 
   if (done) {
-    console.log(JSON.stringify(query));
     done = false;
     return;
   }

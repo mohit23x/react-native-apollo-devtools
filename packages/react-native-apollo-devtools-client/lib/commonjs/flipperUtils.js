@@ -25,7 +25,6 @@ function getQueryData(query, key) {
   }
 
   if (done) {
-    console.log(JSON.stringify(query));
     done = false;
     return;
   }
