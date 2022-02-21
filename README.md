@@ -25,8 +25,11 @@ if(__DEV__){
 
 4. Go to `plugins manager` -> `install plugin` -> `import plugin` (at the bottom)
 
-download [this file](./packages/flipper-plugin-react-native-apollo-devtools/flipper-plugin-react-native-apollo-devtools-v1.0.0.tgz) and import it 
+download [this file](https://github.com/mohit23x/react-native-apollo-devtools/raw/master/packages/flipper-plugin-react-native-apollo-devtools/flipper-plugin-react-native-apollo-devtools-v1.0.0.tgz) and import it 
 
 5. Click `install` and restart Flipper
 
 6. Launch app and you should see `Apollo Devtools` in the list of plugin in disable section, Click `+` icon to enable it 
+
+![image](https://user-images.githubusercontent.com/36567063/153851206-33074526-329c-4b82-87c7-18c59d963649.png)
+
