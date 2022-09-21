@@ -1,16 +1,29 @@
-import type { ApolloClient, NormalizedCacheObject } from '@apollo/client';
+import type {
+  ApolloClient,
+  NormalizedCacheObject,
+  ObservableQuery,
+} from '@apollo/client';
+import { QueryInfo } from '@apollo/client/core/QueryInfo';
+import { ASTNode } from 'graphql';
 
 export type ApolloClientType = ApolloClient<NormalizedCacheObject>;
 
-export interface Query {
-  id: number;
-  name: string | null;
-  variables: Record<string, any> | undefined;
-}
+export type Variables = QueryInfo['variables'];
 
-export type QueryData = Query & {
+export type RawQueryData = {
+  document: ASTNode;
+  variables: Variables;
+  observableQuery: ObservableQuery;
+  lastDiff: any;
+  queryId: string;
+};
+
+export type QueryData = {
+  id: string;
   queryString: string;
-  cachedData: object;
+  variables: Variables;
+  cachedData: string;
+  name: string | undefined;
 };
 
 export type MutationData = {
@@ -24,7 +37,7 @@ export type MutationData = {
 
 export type Callback = () => any;
 
-export type ArrayOfQuery = Array<QueryData | undefined>;
+export type ArrayOfQuery = Array<QueryData>;
 export type ArrayOfMutations = Array<MutationData>;
 
 export type ApolloClientState = {

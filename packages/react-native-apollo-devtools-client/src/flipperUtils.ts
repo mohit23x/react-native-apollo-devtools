@@ -1,51 +1,72 @@
 /* eslint-disable consistent-return */
+import { ObservableQuery } from '@apollo/client';
 import type { QueryInfo } from '@apollo/client/core/QueryInfo';
 import { getOperationName } from '@apollo/client/utilities';
-import { print } from 'graphql';
-import type { QueryData } from './typings';
+import { ASTNode, print } from 'graphql';
+import type { ArrayOfQuery, QueryData, RawQueryData } from './typings';
 
 let done = true;
 
-export function getQueryData(
-  query: QueryInfo,
-  key: number
-): QueryData | undefined {
-  if (!query || !query.document) return;
-  // TODO: The current designs do not account for non-cached data.
-  // We need a workaround to show that data + we should surface
-  // the FetchPolicy.
-  const name = getOperationName(query?.document);
-  if (name === 'IntrospectionQuery') {
-    return;
-  }
+// export function getQueryData(
+//   query: QueryInfo,
+//   key: number,
+// ): QueryData | undefined {
+//   console.log({query, key});
+//   if (!query || !query.document) return;
+//   // TODO: The current designs do not account for non-cached data.
+//   // We need a workaround to show that data + we should surface
+//   // the FetchPolicy.
+//   const name = getOperationName(query?.document);
+//   if (name === 'IntrospectionQuery') {
+//     return;
+//   }
 
-  if (done) {
-    done = false;
-    return;
-  }
+//   if (done) {
+//     done = false;
+//     return;
+//   }
 
-  return {
-    id: key,
-    name,
-    queryString: print(query.document),
-    variables: query.variables,
-    // @ts-expect-error
-    cachedData: query.cachedData,
-  };
-}
+//   return {
+//     id: key,
+//     name,
+//     queryString: print(query.document),
+//     variables: query.variables,
+//     // @ts-expect-error
+//     cachedData: query.cachedData,
+//   };
+// }
 
-export function getQueries(queryMap: Map<any, any>): QueryInfo[] {
-  let queries: QueryInfo[] = [];
+export function getQueries(queryMap: Map<string, RawQueryData>): ArrayOfQuery {
+  let queries: ArrayOfQuery = [];
+
+  // console.log(queryMap);
+  // console.log('query map: ', JSON.stringify([...queryMap.values()][0]?.cache));
+
+  // queryMap.forEach((val, key) => {
+  //   //   // const obj = val[key]
+  //   //   // console.log({key});
+  //   // console.log(val);
+  //   console.log('cache data: ', JSON.stringify(val?.document));
+  //   //   // console.log('cache config: ', val?.cache?.data);
+
+  //   //   // console.log('optimistic data: ', val?.lastDiff?.diff?.result);
+  //   //   // console.log('optimistic data: ', val?.lastDiff?.diff?.missing);
+  // });
 
   if (queryMap) {
-    // @ts-expect-error todo
-    queries = [...queryMap.values()].map(({ document, variables, diff }) => ({
-      document,
-      source: document?.loc?.source,
-      variables,
-      cachedData: diff?.result,
-    }));
+    [...queryMap.values()].forEach(
+      ({ document, variables, observableQuery, lastDiff, queryId }) => {
+        if (document && observableQuery) {
+          queries.push({
+            queryString: print(document),
+            variables,
+            cachedData: lastDiff?.diff?.result,
+            name: observableQuery?.queryName,
+            id: queryId,
+          });
+        }
+      }
+    );
   }
-
   return queries;
 }

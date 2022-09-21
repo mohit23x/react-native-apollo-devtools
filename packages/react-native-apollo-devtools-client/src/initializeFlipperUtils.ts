@@ -21,6 +21,7 @@ function getTime(): string {
 function extractQueries(client: ApolloClientType): Map<any, any> {
   // @ts-expect-error queryManager is private method
   if (!client || !client.queryManager) {
+    console.log('client?.queryManager not present');
     return new Map();
   }
   // @ts-expect-error queryManager is private method
@@ -34,9 +35,12 @@ function getAllQueries(client: ApolloClientType): ArrayOfQuery {
 
   const queryMap = extractQueries(client);
 
+  // console.log({queryMap: JSON.stringify(queryMap)});
+
   const allQueries = getQueries(queryMap);
 
-  return allQueries?.map(getQueryData);
+  return allQueries;
+  // return allQueries?.map(getQueryData);
 }
 
 type MutationObject = {
@@ -73,34 +77,53 @@ function getAllMutations(client: ApolloClientType): ArrayOfMutations {
   return final;
 }
 
-function getCurrentState(client: ApolloClientType): ApolloClientState {
+async function getCurrentState(
+  client: ApolloClientType
+): Promise<ApolloClientState> {
   counter++;
-  return {
-    id: counter,
-    lastUpdateAt: getTime(),
-    queries: getAllQueries(client),
-    mutations: getAllMutations(client),
-    cache: client.cache.extract(true),
-  };
+
+  let currentState: ApolloClientState;
+
+  return new Promise((res, rej) => {
+    setTimeout(() => {
+      currentState = {
+        id: counter,
+        lastUpdateAt: getTime(),
+        queries: getAllQueries(client),
+        mutations: getAllMutations(client),
+        cache: client.cache.extract(true),
+      };
+      res(currentState);
+    }, 0);
+  }).then(() => {
+    console.log({ currentState: JSON.stringify(currentState) });
+
+    return currentState;
+  });
 }
 
-export const initializeFlipperUtils = (
+export const initializeFlipperUtils = async (
   flipperConnection: Flipper.FlipperConnection,
   apolloClient: ApolloClientType
-): void => {
+): Promise<void> => {
   let acknowledged = true;
-  let enqueue: null | ApolloClientState = getCurrentState(apolloClient);
+  let enqueue: null | ApolloClientState = await getCurrentState(apolloClient);
+
+  console.log({ acknowledged });
 
   function sendData() {
+    console.log({ enqueue });
     if (enqueue) {
+      console.log('sending data');
       flipperConnection.send('GQL:response', enqueue);
       acknowledged = false;
       enqueue = null;
     }
   }
 
-  const logger = (): void => {
-    enqueue = getCurrentState(apolloClient);
+  const logger = async (): Promise<void> => {
+    console.log('** logger **');
+    enqueue = await getCurrentState(apolloClient);
     if (acknowledged) {
       sendData();
     }
@@ -108,14 +131,16 @@ export const initializeFlipperUtils = (
 
   flipperConnection.receive('GQL:ack', () => {
     acknowledged = true;
+    console.log('GQL:ack ', acknowledged);
     sendData();
   });
 
-  flipperConnection.receive('GQL:request', () => {
-    flipperConnection.send('GQL:response', getCurrentState(apolloClient));
+  flipperConnection.receive('GQL:request', async () => {
+    console.log('request form flipper');
+    flipperConnection.send('GQL:response', await getCurrentState(apolloClient));
   });
 
-  flipperConnection.send('GQL:response', enqueue);
-
   apolloClient.__actionHookForDevTools(logger);
+
+  flipperConnection.send('GQL:response', enqueue);
 };
