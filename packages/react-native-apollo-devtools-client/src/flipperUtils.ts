@@ -3,7 +3,12 @@ import { ObservableQuery } from '@apollo/client';
 import type { QueryInfo } from '@apollo/client/core/QueryInfo';
 import { getOperationName } from '@apollo/client/utilities';
 import { ASTNode, print } from 'graphql';
-import type { ArrayOfQuery, QueryData, RawQueryData } from './typings';
+import type {
+  ArrayOfQuery,
+  QueryData,
+  RawQueryData,
+  Variables,
+} from './typings';
 
 let done = true;
 
@@ -43,19 +48,21 @@ export function getQueries(queryMap: Map<string, RawQueryData>): ArrayOfQuery {
   // console.log('query map: ', JSON.stringify([...queryMap.values()][0]?.cache));
 
   // queryMap.forEach((val, key) => {
-  //   //   // const obj = val[key]
-  //   //   // console.log({key});
-  //   // console.log(val);
-  //   console.log('cache data: ', JSON.stringify(val?.document));
-  //   //   // console.log('cache config: ', val?.cache?.data);
+  //   // const obj = val[key]
+  //   // console.log({key});
+  // console.log(val);
+  // console.log('cache data: ', JSON.stringify(val?.lastDiff?.diff?.result));
+  //   // console.log('cache config: ', val?.cache?.data);
 
-  //   //   // console.log('optimistic data: ', val?.lastDiff?.diff?.result);
-  //   //   // console.log('optimistic data: ', val?.lastDiff?.diff?.missing);
+  //   // console.log('optimistic data: ', val?.lastDiff?.diff?.result);
+  //   // console.log('optimistic data: ', val?.lastDiff?.diff?.missing);
   // });
 
   if (queryMap) {
     [...queryMap.values()].forEach(
-      ({ document, variables, observableQuery, lastDiff, queryId }) => {
+      ({ document, variables, observableQuery, lastDiff, queryId, diff }) => {
+        // console.log("lastDiff: ", lastDiff);
+        console.log('diff: ', diff);
         if (document && observableQuery) {
           queries.push({
             queryString: print(document),

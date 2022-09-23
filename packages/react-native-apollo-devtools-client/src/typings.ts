@@ -3,8 +3,8 @@ import type {
   NormalizedCacheObject,
   ObservableQuery,
 } from '@apollo/client';
-import { QueryInfo } from '@apollo/client/core/QueryInfo';
-import { ASTNode } from 'graphql';
+import type { QueryInfo } from '@apollo/client/core/QueryInfo';
+import type { ASTNode } from 'graphql';
 
 export type ApolloClientType = ApolloClient<NormalizedCacheObject>;
 

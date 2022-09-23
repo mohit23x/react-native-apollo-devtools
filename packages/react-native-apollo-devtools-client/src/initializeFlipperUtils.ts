@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable max-statements-per-line */
+/* eslint-disable babel/no-invalid-this */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import type { DocumentNode } from '@apollo/client';
 import { getOperationName } from '@apollo/client/utilities';
@@ -21,7 +24,6 @@ function getTime(): string {
 function extractQueries(client: ApolloClientType): Map<any, any> {
   // @ts-expect-error queryManager is private method
   if (!client || !client.queryManager) {
-    console.log('client?.queryManager not present');
     return new Map();
   }
   // @ts-expect-error queryManager is private method
@@ -29,18 +31,9 @@ function extractQueries(client: ApolloClientType): Map<any, any> {
 }
 
 function getAllQueries(client: ApolloClientType): ArrayOfQuery {
-  // console.log("==========")
-  // console.log("queries: ", client.queryManager.queries);
-  // console.log("==========")
-
   const queryMap = extractQueries(client);
-
-  // console.log({queryMap: JSON.stringify(queryMap)});
-
   const allQueries = getQueries(queryMap);
-
   return allQueries;
-  // return allQueries?.map(getQueryData);
 }
 
 type MutationObject = {
@@ -55,8 +48,8 @@ function getMutationData(
   return [...Object.keys(allMutations)]?.map((key) => {
     const { mutation, variables, loading, error } = allMutations[key];
 
-    // console.log({ key });
-    // console.log(JSON.stringify(allMutations[key]));
+    console.log({ loading, error, body: mutation?.loc?.source?.body });
+
     return {
       id: key,
       name: getOperationName(mutation),
@@ -77,9 +70,7 @@ function getAllMutations(client: ApolloClientType): ArrayOfMutations {
   return final;
 }
 
-async function getCurrentState(
-  client: ApolloClientType
-): Promise<ApolloClientState> {
+function getCurrentState(client: ApolloClientType): Promise<ApolloClientState> {
   counter++;
 
   let currentState: ApolloClientState;
@@ -96,10 +87,21 @@ async function getCurrentState(
       res(currentState);
     }, 0);
   }).then(() => {
-    console.log({ currentState: JSON.stringify(currentState) });
+    console.log({ currentState: currentState?.queries[0] });
 
     return currentState;
   });
+}
+
+function debounce(func: (...args: any) => any, timeout = 500): () => any {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    // @ts-expect-error missing type for "this"
+    timer = setTimeout(() => {
+      func.apply(this, args);
+    }, timeout);
+  };
 }
 
 export const initializeFlipperUtils = async (
@@ -111,7 +113,7 @@ export const initializeFlipperUtils = async (
 
   console.log({ acknowledged });
 
-  function sendData() {
+  function sendData(): void {
     console.log({ enqueue });
     if (enqueue) {
       console.log('sending data');
@@ -123,8 +125,8 @@ export const initializeFlipperUtils = async (
 
   const logger = async (): Promise<void> => {
     console.log('** logger **');
-    enqueue = await getCurrentState(apolloClient);
     if (acknowledged) {
+      enqueue = await getCurrentState(apolloClient);
       sendData();
     }
   };
@@ -140,7 +142,7 @@ export const initializeFlipperUtils = async (
     flipperConnection.send('GQL:response', await getCurrentState(apolloClient));
   });
 
-  apolloClient.__actionHookForDevTools(logger);
+  apolloClient.__actionHookForDevTools(debounce(() => logger()));
 
   flipperConnection.send('GQL:response', enqueue);
 };

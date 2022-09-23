@@ -8,10 +8,15 @@
   "flipperBundlerEntry": "src/index.tsx",
   "license": "MIT",
   "keywords": [
-    "flipper-plugin"
+    "flipper-plugin",
+    "apollo client devtool",
+    "react native apollo devtool"
   ],
-  "icon": "apps",
+  "icon": "rocket",
   "title": "Apollo Devtools",
+  "bugs": {
+    "email": "mohit.lodha@razorpay.com"
+  },
   "scripts": {
     "lint": "flipper-pkg lint",
     "prepack": "flipper-pkg lint && flipper-pkg bundle",

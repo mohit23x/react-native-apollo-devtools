@@ -9,12 +9,13 @@ export const apolloDevToolsInit = (
   }: {
     onConnect?: Callback;
   }
-) =>
+): void =>
   addPlugin({
     getId() {
       return 'react-native-apollo-devtools';
     },
     onConnect(connection) {
+      console.log('connection: ', connection);
       initializeFlipperUtils(connection, client);
       if (onConnect) onConnect();
     },
