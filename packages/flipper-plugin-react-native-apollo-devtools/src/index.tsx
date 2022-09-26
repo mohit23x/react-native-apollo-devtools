@@ -32,7 +32,7 @@ export function plugin(client: PluginClient<Events, {}>) {
   });
 
   client.addMenuEntry({
-    label: "❌ clear",
+    label: "*️⃣ clear",
     handler: async () => {
       data.set(InitialData);
       selectedItem.set({})

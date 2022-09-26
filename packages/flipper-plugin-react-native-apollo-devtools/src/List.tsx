@@ -1,4 +1,4 @@
-import React, { Dispatch, memo, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, memo, SetStateAction } from "react";
 import { Layout } from "flipper-plugin";
 import { Button, Tabs } from "antd";
 import { BlockType, Data, } from './typings'
@@ -21,9 +21,7 @@ const TabItem = memo(
     }) => {
         return (
             <Button
-                onClick={() => {
-                    onPress(data);
-                }}
+                onClick={() => onPress(data)}
                 type={active ? "primary" : "text"}
                 block
                 style={{ textAlign: "left", margin: "5px 0" }}
@@ -46,11 +44,12 @@ export function List({ data, activeTab, selectedItem, onItemSelect, onTabChange 
     return (
         <Layout.ScrollContainer>
             <Tabs defaultActiveKey="1" onChange={onTabChange}>
+                {/* CACHE */}
                 <TabPane tab={TabsEnum.cache.value} key={TabsEnum.cache.key}>
                     {data?.cache?.map((d, i) => {
                         const active =
                             activeTab === TabsEnum.cache.key &&
-                            selectedItem?.id === d?.id;
+                            selectedItem?.name === d?.name;
 
                         return (
                             <TabItem
@@ -62,6 +61,7 @@ export function List({ data, activeTab, selectedItem, onItemSelect, onTabChange 
                         );
                     })}
                 </TabPane>
+                {/* QUERY */}
                 <TabPane tab={TabsEnum.query.value} key={TabsEnum.query.key}>
                     {data?.queries?.map((d) => {
                         const active =
@@ -78,6 +78,7 @@ export function List({ data, activeTab, selectedItem, onItemSelect, onTabChange 
                         );
                     })}
                 </TabPane>
+                {/* MUTATION */}
                 <TabPane tab={TabsEnum.mutation.value} key={TabsEnum.mutation.key}>
                     {data?.mutations?.map((d) => {
                         const active =

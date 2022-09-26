@@ -1,11 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable max-statements-per-line */
-/* eslint-disable babel/no-invalid-this */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { DocumentNode } from '@apollo/client';
 import { getOperationName } from '@apollo/client/utilities';
 import type { Flipper } from 'react-native-flipper';
-import { getQueries, getQueryData } from './flipperUtils';
+import { getQueries } from './flipperUtils';
 import type {
   ApolloClientState,
   ApolloClientType,
@@ -48,8 +44,6 @@ function getMutationData(
   return [...Object.keys(allMutations)]?.map((key) => {
     const { mutation, variables, loading, error } = allMutations[key];
 
-    console.log({ loading, error, body: mutation?.loc?.source?.body });
-
     return {
       id: key,
       name: getOperationName(mutation),
@@ -75,7 +69,7 @@ function getCurrentState(client: ApolloClientType): Promise<ApolloClientState> {
 
   let currentState: ApolloClientState;
 
-  return new Promise((res, rej) => {
+  return new Promise((res) => {
     setTimeout(() => {
       currentState = {
         id: counter,
@@ -87,17 +81,14 @@ function getCurrentState(client: ApolloClientType): Promise<ApolloClientState> {
       res(currentState);
     }, 0);
   }).then(() => {
-    console.log({ currentState: currentState?.queries[0] });
-
     return currentState;
   });
 }
 
 function debounce(func: (...args: any) => any, timeout = 500): () => any {
-  let timer;
+  let timer: NodeJS.Timeout;
   return (...args) => {
     clearTimeout(timer);
-    // @ts-expect-error missing type for "this"
     timer = setTimeout(() => {
       func.apply(this, args);
     }, timeout);
@@ -111,12 +102,8 @@ export const initializeFlipperUtils = async (
   let acknowledged = true;
   let enqueue: null | ApolloClientState = await getCurrentState(apolloClient);
 
-  console.log({ acknowledged });
-
   function sendData(): void {
-    console.log({ enqueue });
     if (enqueue) {
-      console.log('sending data');
       flipperConnection.send('GQL:response', enqueue);
       acknowledged = false;
       enqueue = null;
@@ -124,7 +111,6 @@ export const initializeFlipperUtils = async (
   }
 
   const logger = async (): Promise<void> => {
-    console.log('** logger **');
     if (acknowledged) {
       enqueue = await getCurrentState(apolloClient);
       sendData();
@@ -133,12 +119,10 @@ export const initializeFlipperUtils = async (
 
   flipperConnection.receive('GQL:ack', () => {
     acknowledged = true;
-    console.log('GQL:ack ', acknowledged);
     sendData();
   });
 
   flipperConnection.receive('GQL:request', async () => {
-    console.log('request form flipper');
     flipperConnection.send('GQL:response', await getCurrentState(apolloClient));
   });
 
