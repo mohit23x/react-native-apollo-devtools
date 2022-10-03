@@ -6,12 +6,12 @@ export function getQueries(queryMap: Map<string, RawQueryData>): ArrayOfQuery {
 
   if (queryMap) {
     [...queryMap.values()].forEach(
-      ({ document, variables, observableQuery, lastDiff, queryId }) => {
+      ({ document, variables, observableQuery, diff, lastDiff, queryId }) => {
         if (document && observableQuery) {
           queries.push({
             queryString: print(document),
             variables,
-            cachedData: lastDiff?.diff?.result,
+            cachedData: diff?.result || lastDiff?.diff?.result,
             name: observableQuery?.queryName,
             id: queryId,
           });

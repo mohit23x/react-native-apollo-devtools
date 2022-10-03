@@ -15,6 +15,7 @@ export type RawQueryData = {
   variables: Variables;
   observableQuery: ObservableQuery;
   lastDiff: any;
+  diff: any;
   queryId: string;
 };
 
